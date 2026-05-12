@@ -1,6 +1,8 @@
 # TideView
 
-![TideView Logo](assets/images/logo.png)
+<p align="center">
+  <img src="assets/images/logo.png" width="160" alt="TideView Logo" />
+</p>
 
 > **Real-Time Multi-Market Intelligence at Your Fingertips**
 
@@ -10,9 +12,9 @@ _A production-grade Flutter application demonstrating Clean Architecture, offlin
 
 ## App Preview
 
-| Dashboard                                   | Markets                                   | Asset Detail                                   | Convert                                   | Settings                                   |
-| ------------------------------------------- | ----------------------------------------- | ---------------------------------------------- | ----------------------------------------- | ------------------------------------------ |
-| ![Dashboard](assets/images/placeholder.png) | ![Markets](assets/images/placeholder.png) | ![Asset Detail](assets/images/placeholder.png) | ![Convert](assets/images/placeholder.png) | ![Settings](assets/images/placeholder.png) |
+| Dashboard                                                                           | Markets                                                                         | Asset Detail                                                                              | Convert                                                                         | Settings                                                                          |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <img src="assets/images/dashboard.jpeg" width="220" height="260" alt="Dashboard" /> | <img src="assets/images/markets.jpeg" width="220" height="260" alt="Markets" /> | <img src="assets/images/asset_detail.jpeg" width="220" height="260" alt="Asset Detail" /> | <img src="assets/images/convert.jpeg" width="220" height="260" alt="Convert" /> | <img src="assets/images/settings.jpeg" width="220" height="260" alt="Settings" /> |
 
 ---
 
