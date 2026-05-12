@@ -1,7 +1,7 @@
 # TideView
 
 <p align="center">
-  <img src="assets/images/logo.png" width="160" alt="TideView Logo" />
+  <img src="assets/images/icon_logo.png" width="120" alt="TideView Logo" />
 </p>
 
 > **Real-Time Multi-Market Intelligence at Your Fingertips**
