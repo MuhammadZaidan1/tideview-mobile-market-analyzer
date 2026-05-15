@@ -98,18 +98,6 @@ abstract class AppLocalizations {
     Locale('id'),
   ];
 
-  /// No description provided for @appTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'TideView'**
-  String get appTitle;
-
-  /// No description provided for @welcome.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome back'**
-  String get welcome;
-
   /// No description provided for @dashboard.
   ///
   /// In en, this message translates to:
@@ -134,64 +122,16 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @createNewCategory.
+  /// No description provided for @emptyCategoryMessage.
   ///
   /// In en, this message translates to:
-  /// **'Create New Category'**
-  String get createNewCategory;
-
-  /// No description provided for @categoryExample.
-  ///
-  /// In en, this message translates to:
-  /// **'Example: Galau Coins, Long Term'**
-  String get categoryExample;
-
-  /// No description provided for @cancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancel;
-
-  /// No description provided for @save.
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get save;
-
-  /// No description provided for @editCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Category'**
-  String get editCategory;
-
-  /// No description provided for @emptyWatchlistMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Main watchlist is still empty.\nAdd coins from Market first!'**
-  String get emptyWatchlistMessage;
-
-  /// No description provided for @editAssets.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Assets'**
-  String get editAssets;
-
-  /// No description provided for @reorderList.
-  ///
-  /// In en, this message translates to:
-  /// **'Reorder List'**
-  String get reorderList;
-
-  /// No description provided for @deleteCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Category'**
-  String get deleteCategory;
+  /// **'Category is empty. Add assets from Markets.'**
+  String get emptyCategoryMessage;
 
   /// No description provided for @greeting.
   ///
   /// In en, this message translates to:
-  /// **'Hello, Zaidan!'**
+  /// **'TideView'**
   String get greeting;
 
   /// No description provided for @onlineStatus.
@@ -230,53 +170,17 @@ abstract class AppLocalizations {
   /// **'Failed to load data'**
   String get failedToLoadData;
 
-  /// No description provided for @emptyCategoryMessage.
+  /// No description provided for @exploreMarkets.
   ///
   /// In en, this message translates to:
-  /// **'Watchlist is empty in this category.\nSearch and add favorites from the Markets menu.'**
-  String get emptyCategoryMessage;
-
-  /// No description provided for @sortBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Sort By'**
-  String get sortBy;
-
-  /// No description provided for @sortByName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name (A - Z)'**
-  String get sortByName;
-
-  /// No description provided for @topGainers.
-  ///
-  /// In en, this message translates to:
-  /// **'Top Gainers (🔥)'**
-  String get topGainers;
-
-  /// No description provided for @topLosers.
-  ///
-  /// In en, this message translates to:
-  /// **'Top Losers (🩸)'**
-  String get topLosers;
-
-  /// No description provided for @marketExplorers.
-  ///
-  /// In en, this message translates to:
-  /// **'Market Explorers'**
-  String get marketExplorers;
+  /// **'Explore Markets'**
+  String get exploreMarkets;
 
   /// No description provided for @searchAssets.
   ///
   /// In en, this message translates to:
   /// **'Search assets...'**
   String get searchAssets;
-
-  /// No description provided for @error.
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get error;
 
   /// No description provided for @from.
   ///
@@ -323,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @systemDefault.
   ///
   /// In en, this message translates to:
-  /// **'System Default'**
+  /// **'Default'**
   String get systemDefault;
 
   /// No description provided for @light.
@@ -347,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectThemeColor.
   ///
   /// In en, this message translates to:
-  /// **'Select Theme Color'**
+  /// **'Choose theme color'**
   String get selectThemeColor;
 
   /// No description provided for @preferences.
@@ -389,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @cacheSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Cache cleared successfully! 🚀'**
+  /// **'Cache cleared successfully.'**
   String get cacheSuccess;
 
   /// No description provided for @preparingImage.
@@ -401,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareMessage.
   ///
   /// In en, this message translates to:
-  /// **'Currently monitoring {name} price on TideView! It\'s currently \${price}. What do you think?'**
+  /// **'Monitoring {name} price on TideView.\nCurrent price is {price}.'**
   String shareMessage(String name, String price);
 
   /// No description provided for @shareFailed.
@@ -425,26 +329,20 @@ abstract class AppLocalizations {
   /// No description provided for @chartResting.
   ///
   /// In en, this message translates to:
-  /// **'Chart is Resting'**
+  /// **'Chart is idle'**
   String get chartResting;
-
-  /// No description provided for @unknownError.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown error'**
-  String get unknownError;
-
-  /// No description provided for @tryAgain.
-  ///
-  /// In en, this message translates to:
-  /// **'Try Again'**
-  String get tryAgain;
 
   /// No description provided for @noChartData.
   ///
   /// In en, this message translates to:
   /// **'No chart data available'**
   String get noChartData;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
 
   /// No description provided for @marketStats.
   ///
@@ -476,112 +374,94 @@ abstract class AppLocalizations {
   /// **'Select Asset'**
   String get selectAsset;
 
-  /// No description provided for @searchAssetHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search assets (BTC, Apple, USD)...'**
-  String get searchAssetHint;
-
   /// No description provided for @assetNotFound.
   ///
   /// In en, this message translates to:
   /// **'Asset not found.'**
   String get assetNotFound;
 
-  /// No description provided for @errorWithMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Error: {message}'**
-  String errorWithMessage(String message);
-
   /// No description provided for @offlineModeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Offline Mode - Showing cached data'**
+  /// **'Offline mode — showing cached data'**
   String get offlineModeMessage;
 
   /// No description provided for @setPriceAlert.
   ///
   /// In en, this message translates to:
-  /// **'Set Price Alert'**
+  /// **'Set price alert'**
   String get setPriceAlert;
 
   /// No description provided for @priceAlertDescription.
   ///
   /// In en, this message translates to:
-  /// **'Receive a push notification when the price hits your target.'**
+  /// **'Receive a notification when price reaches target.'**
   String get priceAlertDescription;
 
   /// No description provided for @selectAssetLabel.
   ///
   /// In en, this message translates to:
-  /// **'SELECT ASSET'**
+  /// **'Select asset'**
   String get selectAssetLabel;
 
   /// No description provided for @chooseAssetHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose Asset...'**
+  /// **'Choose asset...'**
   String get chooseAssetHint;
 
   /// No description provided for @conditionLabel.
   ///
   /// In en, this message translates to:
-  /// **'CONDITION'**
+  /// **'Condition'**
   String get conditionLabel;
 
   /// No description provided for @priceGoesAbove.
   ///
   /// In en, this message translates to:
-  /// **'Price goes ABOVE'**
+  /// **'Goes above'**
   String get priceGoesAbove;
 
   /// No description provided for @priceGoesBelow.
   ///
   /// In en, this message translates to:
-  /// **'Price goes BELOW'**
+  /// **'Goes below'**
   String get priceGoesBelow;
-
-  /// No description provided for @targetPriceUsd.
-  ///
-  /// In en, this message translates to:
-  /// **'TARGET PRICE (USD)'**
-  String get targetPriceUsd;
 
   /// No description provided for @alertSavedSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Alert saved successfully!'**
+  /// **'Alert saved'**
   String get alertSavedSuccess;
 
   /// No description provided for @setAlarmButton.
   ///
   /// In en, this message translates to:
-  /// **'Set Alarm'**
+  /// **'Set alert'**
   String get setAlarmButton;
 
   /// No description provided for @widgetSyncRate.
   ///
   /// In en, this message translates to:
-  /// **'Widget Sync Rate'**
+  /// **'Widget sync rate'**
   String get widgetSyncRate;
 
   /// No description provided for @sync15Min.
   ///
   /// In en, this message translates to:
-  /// **'15 Minutes'**
+  /// **'15 min'**
   String get sync15Min;
 
   /// No description provided for @sync30Min.
   ///
   /// In en, this message translates to:
-  /// **'30 Minutes'**
+  /// **'30 min'**
   String get sync30Min;
 
   /// No description provided for @sync1Hour.
   ///
   /// In en, this message translates to:
-  /// **'1 Hour'**
+  /// **'1 hour'**
   String get sync1Hour;
 
   /// No description provided for @widgetManagement.
@@ -605,14 +485,14 @@ abstract class AppLocalizations {
   /// No description provided for @manageAlerts.
   ///
   /// In en, this message translates to:
-  /// **'Manage Price Alerts'**
+  /// **'Manage alerts'**
   String get manageAlerts;
 
-  /// No description provided for @noAlerts.
+  /// No description provided for @noAlertsSet.
   ///
   /// In en, this message translates to:
   /// **'No alerts set'**
-  String get noAlerts;
+  String get noAlertsSet;
 
   /// No description provided for @priceAbove.
   ///
@@ -626,17 +506,125 @@ abstract class AppLocalizations {
   /// **'Below'**
   String get priceBelow;
 
-  /// No description provided for @alertDeleted.
+  /// No description provided for @addAlert.
   ///
   /// In en, this message translates to:
-  /// **'Alert deleted'**
-  String get alertDeleted;
+  /// **'Add alert'**
+  String get addAlert;
 
-  /// No description provided for @exploreMarkets.
+  /// No description provided for @clearCacheConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Explore Markets'**
-  String get exploreMarkets;
+  /// **'Clear cache?'**
+  String get clearCacheConfirmTitle;
+
+  /// No description provided for @clearCacheConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all cached data?\nThis cannot be undone.'**
+  String get clearCacheConfirmMessage;
+
+  /// No description provided for @yesClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, clear'**
+  String get yesClear;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @createNewCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Category'**
+  String get createNewCategory;
+
+  /// No description provided for @categoryExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Tech Stocks, Top Crypto...'**
+  String get categoryExample;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get editCategory;
+
+  /// No description provided for @emptyWatchlistMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist is empty. Add assets first.'**
+  String get emptyWatchlistMessage;
+
+  /// No description provided for @editAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Assets'**
+  String get editAssets;
+
+  /// No description provided for @reorderList.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder List'**
+  String get reorderList;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get deleteCategory;
+
+  /// No description provided for @categoryCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get categoryCreatedTitle;
+
+  /// No description provided for @categoryCreatedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Category created successfully.'**
+  String get categoryCreatedMessage;
+
+  /// No description provided for @deleteCategoryConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category?'**
+  String get deleteCategoryConfirmTitle;
+
+  /// No description provided for @deleteCategoryConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this category? Assets inside will remain safe.'**
+  String get deleteCategoryConfirmMessage;
+
+  /// No description provided for @yesDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get yesDelete;
+
+  /// Error message when user selects 1D timeframe for Forex
+  ///
+  /// In en, this message translates to:
+  /// **'Intraday (1D) data is not available for Forex markets.'**
+  String get forexIntradayNotAvailable;
 }
 
 class _AppLocalizationsDelegate

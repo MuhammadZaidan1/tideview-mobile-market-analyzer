@@ -11,16 +11,19 @@ class AlertNotifier extends AsyncNotifier<List<PriceAlert>> {
   @override
   Future<List<PriceAlert>> build() async {
     _isarService = IsarService();
+    final initialAlerts = await _fetchAlerts();
     final isar = await _isarService.db;
-    _subscription = isar.priceAlerts.watchLazy(fireImmediately: true).listen((
+    _subscription = isar.priceAlerts.watchLazy(fireImmediately: false).listen((
       _,
     ) {
       loadAlerts();
     });
+
     ref.onDispose(() {
       _subscription?.cancel();
     });
-    return _fetchAlerts();
+
+    return initialAlerts;
   }
 
   Future<List<PriceAlert>> _fetchAlerts() async {

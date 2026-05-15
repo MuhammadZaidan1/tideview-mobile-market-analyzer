@@ -15,5 +15,9 @@ class AssetCache {
   bool isWatchlisted = false;
   String? historicalDataJson;
   int sortOrder = 0;
+  @Index(type: IndexType.hashElements)
   List<String> customCategories = [];
+  // ignore: invalid_annotation_target
+  @ignore
+  set image(dynamic value) {}
 }

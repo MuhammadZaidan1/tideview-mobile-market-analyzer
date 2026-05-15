@@ -9,5 +9,6 @@ class PriceAlert {
   late String symbol;
   late double targetPrice;
   late bool isAbove;
+  @Index()
   bool isActive = true;
 }

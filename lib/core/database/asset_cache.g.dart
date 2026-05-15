@@ -86,6 +86,19 @@ const AssetCacheSchema = CollectionSchema(
           caseSensitive: true,
         )
       ],
+    ),
+    r'customCategories': IndexSchema(
+      id: 4041594653332160683,
+      name: r'customCategories',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'customCategories',
+          type: IndexType.hashElements,
+          caseSensitive: true,
+        )
+      ],
     )
   },
   links: {},
@@ -371,6 +384,51 @@ extension AssetCacheQueryWhere
               indexName: r'symbol',
               lower: [],
               upper: [symbol],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<AssetCache, AssetCache, QAfterWhereClause>
+      customCategoriesElementEqualTo(String customCategoriesElement) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'customCategories',
+        value: [customCategoriesElement],
+      ));
+    });
+  }
+
+  QueryBuilder<AssetCache, AssetCache, QAfterWhereClause>
+      customCategoriesElementNotEqualTo(String customCategoriesElement) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'customCategories',
+              lower: [],
+              upper: [customCategoriesElement],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'customCategories',
+              lower: [customCategoriesElement],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'customCategories',
+              lower: [customCategoriesElement],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'customCategories',
+              lower: [],
+              upper: [customCategoriesElement],
               includeUpper: false,
             ));
       }

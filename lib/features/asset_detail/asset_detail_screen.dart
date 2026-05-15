@@ -19,6 +19,7 @@ import '../../core/providers/exchange_rate_provider.dart';
 import '../../core/theme/theme_provider.dart';
 
 final Map<String, List<FlSpot>> _chartMemoryCache = {};
+
 class AssetDetailScreen extends ConsumerStatefulWidget {
   final AssetCache asset;
   const AssetDetailScreen({super.key, required this.asset});
@@ -39,17 +40,20 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
   final StocksRepository _stocksRepository = StocksRepository();
   final ScreenshotController _screenshotController = ScreenshotController();
   final IsarService _isarService = IsarService();
+
   @override
   void initState() {
     super.initState();
     _isWatchlisted = widget.asset.isWatchlisted;
     _fetchChartData();
   }
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
     super.dispose();
   }
+
   Future<void> _fetchChartData() async {
     final cacheKey = '${widget.asset.symbol}_$_selectedTimeframe';
     if (_chartMemoryCache.containsKey(cacheKey)) {
@@ -74,6 +78,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
         historicalData = await _stocksRepository.fetchHistoricalData(
           widget.asset.symbol,
           _selectedTimeframe,
+          widget.asset.currentPrice,
         );
       } else if (widget.asset.marketType == 'forex') {
         historicalData = await _forexRepository.fetchHistoricalData(
@@ -86,6 +91,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
           _selectedTimeframe,
         );
       }
+
       final chartSpots = <FlSpot>[];
       if (historicalData.isNotEmpty) {
         final minTimestamp = historicalData.first[0];
@@ -102,6 +108,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       } else {
         throw Exception("No data");
       }
+
       _chartMemoryCache[cacheKey] = chartSpots;
       if (mounted) {
         setState(() {
@@ -118,6 +125,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       }
     }
   }
+
   Future<void> _takeScreenshotAndShare() async {
     try {
       await HapticFeedback.heavyImpact();
@@ -156,6 +164,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       ).showSnackBar(SnackBar(content: Text(l10n.shareFailed(e.toString()))));
     }
   }
+
   Future<void> _toggleWatchlist() async {
     await HapticFeedback.selectionClick();
     await _isarService.toggleWatchlist(widget.asset.symbol);
@@ -173,14 +182,18 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       );
     }
   }
+
   void _vibrateSelection() async => await HapticFeedback.selectionClick();
+
   Widget _buildChartWidget(double rate, String baseCurrency) {
     final l10n = AppLocalizations.of(context)!;
     final isPositive = widget.asset.priceChange24h >= 0;
     final chartColor = isPositive ? Colors.green : Colors.redAccent;
+
     if (_isLoadingChart) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (_chartErrorMessage != null) {
       return Center(
         child: Column(
@@ -226,6 +239,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
         ),
       );
     }
+
     if (_chartData.isEmpty) {
       return Center(
         child: Text(
@@ -234,6 +248,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
         ),
       );
     }
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
@@ -326,6 +341,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       curve: Curves.easeInOut,
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -339,6 +355,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       baseCurrency,
       rate,
     );
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -432,127 +449,54 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
                 padding: const EdgeInsets.only(top: 16, bottom: 16),
                 child: Column(
                   children: [
-                    Text(
-                      formattedPrice,
-                      style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${isPositive ? '+' : ''}${widget.asset.priceChange24h.toStringAsFixed(2)}% ($_selectedTimeframe)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: chartColor,
-                      ),
+                    _AssetDetailHeader(
+                      formattedPrice: formattedPrice,
+                      changeText:
+                          '${isPositive ? '+' : ''}${widget.asset.priceChange24h.toStringAsFixed(2)}% ($_selectedTimeframe)',
+                      chartColor: chartColor,
                     ),
                     const SizedBox(height: 32),
-                    SizedBox(
-                      height: 250,
-                      width: double.infinity,
-                      child: _buildChartWidget(rate, baseCurrency),
+                    _AssetDetailChartSection(
+                      chartWidget: _buildChartWidget(rate, baseCurrency),
                     ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: _timeframes.map((tf) {
-                  final isSelected = _selectedTimeframe == tf;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        _vibrateSelection();
-                        setState(() {
-                          _selectedTimeframe = tf;
-                          final cacheKey = '${widget.asset.symbol}_$tf';
-                          if (!_chartMemoryCache.containsKey(cacheKey)) {
-                            _isLoadingChart = true;
-                          }
-                        });
-                        final cacheKey = '${widget.asset.symbol}_$tf';
-                        if (_chartMemoryCache.containsKey(cacheKey)) {
-                          _fetchChartData();
-                          return;
-                        }
-                        if (_debounceTimer?.isActive ?? false) {
-                          _debounceTimer!.cancel();
-                        }
-                        _debounceTimer = Timer(
-                          const Duration(milliseconds: 1000),
-                          () {
-                            _fetchChartData();
-                          },
-                        );
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(
-                                  context,
-                                ).colorScheme.primary.withValues(alpha: 0.1)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          tf,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+            _AssetDetailTimeframeSelector(
+              timeframes: _timeframes,
+              selectedTimeframe: _selectedTimeframe,
+              onTimeframeSelected: (tf) {
+                _vibrateSelection();
+                setState(() {
+                  _selectedTimeframe = tf;
+                  final cacheKey = '${widget.asset.symbol}_$tf';
+                  if (!_chartMemoryCache.containsKey(cacheKey)) {
+                    _isLoadingChart = true;
+                  }
+                });
+                final cacheKey = '${widget.asset.symbol}_$tf';
+                if (_chartMemoryCache.containsKey(cacheKey)) {
+                  _fetchChartData();
+                  return;
+                }
+                if (_debounceTimer?.isActive ?? false) {
+                  _debounceTimer!.cancel();
+                }
+                _debounceTimer = Timer(const Duration(milliseconds: 1000), () {
+                  _fetchChartData();
+                });
+              },
             ),
             const SizedBox(height: 32),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.marketStats,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildStatRow(
-                    l10n.marketType,
-                    widget.asset.marketType.toUpperCase(),
-                  ),
-                  const Divider(height: 24),
-                  _buildStatRow(
-                    l10n.lastUpdated,
-                    '${widget.asset.lastUpdated.hour}:${widget.asset.lastUpdated.minute.toString().padLeft(2, '0')}',
-                  ),
-                ],
-              ),
+            _AssetDetailStatsCard(
+              marketStatsLabel: l10n.marketStats,
+              marketTypeLabel: l10n.marketType,
+              marketTypeValue: widget.asset.marketType.toUpperCase(),
+              lastUpdatedLabel: l10n.lastUpdated,
+              lastUpdatedValue:
+                  '${widget.asset.lastUpdated.hour}:${widget.asset.lastUpdated.minute.toString().padLeft(2, '0')}',
             ),
             const SizedBox(height: 32),
             _buildShareButton(l10n.shareCard),
@@ -562,6 +506,7 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       ),
     );
   }
+
   Widget _buildShareButton(String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -601,7 +546,161 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
       ),
     );
   }
-  Widget _buildStatRow(String label, String value) {
+}
+
+class _AssetDetailHeader extends StatelessWidget {
+  final String formattedPrice;
+  final String changeText;
+  final Color chartColor;
+
+  const _AssetDetailHeader({
+    required this.formattedPrice,
+    required this.changeText,
+    required this.chartColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          formattedPrice,
+          style: const TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          changeText,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: chartColor,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AssetDetailChartSection extends StatelessWidget {
+  final Widget chartWidget;
+
+  const _AssetDetailChartSection({required this.chartWidget});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(height: 250, width: double.infinity, child: chartWidget);
+  }
+}
+
+class _AssetDetailTimeframeSelector extends StatelessWidget {
+  final List<String> timeframes;
+  final String selectedTimeframe;
+  final void Function(String) onTimeframeSelected;
+
+  const _AssetDetailTimeframeSelector({
+    required this.timeframes,
+    required this.selectedTimeframe,
+    required this.onTimeframeSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: timeframes.map((tf) {
+          final isSelected = selectedTimeframe == tf;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTimeframeSelected(tf),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  tf,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _AssetDetailStatsCard extends StatelessWidget {
+  final String marketStatsLabel;
+  final String marketTypeLabel;
+  final String marketTypeValue;
+  final String lastUpdatedLabel;
+  final String lastUpdatedValue;
+
+  const _AssetDetailStatsCard({
+    required this.marketStatsLabel,
+    required this.marketTypeLabel,
+    required this.marketTypeValue,
+    required this.lastUpdatedLabel,
+    required this.lastUpdatedValue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            marketStatsLabel,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          const SizedBox(height: 16),
+          _StatRow(label: marketTypeLabel, value: marketTypeValue),
+          const Divider(height: 24),
+          _StatRow(label: lastUpdatedLabel, value: lastUpdatedValue),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

@@ -9,12 +9,6 @@ class AppLocalizationsId extends AppLocalizations {
   AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
-  String get appTitle => 'TideView';
-
-  @override
-  String get welcome => 'Selamat datang kembali';
-
-  @override
   String get dashboard => 'Dasbor';
 
   @override
@@ -27,35 +21,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings => 'Pengaturan';
 
   @override
-  String get createNewCategory => 'Buat Kategori Baru';
+  String get emptyCategoryMessage =>
+      'Kategori kosong. Tambahkan aset dari Markets.';
 
   @override
-  String get categoryExample => 'Contoh: Koin Galau, Jangka Panjang';
-
-  @override
-  String get cancel => 'Batal';
-
-  @override
-  String get save => 'Simpan';
-
-  @override
-  String get editCategory => 'Edit Kategori';
-
-  @override
-  String get emptyWatchlistMessage =>
-      'Watchlist utama masih kosong.\nTambahkan dulu koin dari Pasar!';
-
-  @override
-  String get editAssets => 'Edit Aset';
-
-  @override
-  String get reorderList => 'Susun Ulang Daftar';
-
-  @override
-  String get deleteCategory => 'Hapus Kategori';
-
-  @override
-  String get greeting => 'Halo, Zaidan!';
+  String get greeting => 'TideView';
 
   @override
   String get onlineStatus => 'Online';
@@ -76,29 +46,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get failedToLoadData => 'Gagal memuat data';
 
   @override
-  String get emptyCategoryMessage =>
-      'Watchlist kosong di kategori ini.\nCari dan tambahkan favorit dari menu Pasar.';
-
-  @override
-  String get sortBy => 'Urutkan Berdasarkan';
-
-  @override
-  String get sortByName => 'Nama (A - Z)';
-
-  @override
-  String get topGainers => 'Top Gainers (🔥)';
-
-  @override
-  String get topLosers => 'Top Losers (🩸)';
-
-  @override
-  String get marketExplorers => 'Penjelajah Pasar';
+  String get exploreMarkets => 'Jelajahi Pasar';
 
   @override
   String get searchAssets => 'Cari aset...';
-
-  @override
-  String get error => 'Error';
 
   @override
   String get from => 'Dari';
@@ -122,7 +73,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get appTheme => 'Tema Aplikasi';
 
   @override
-  String get systemDefault => 'Default Sistem';
+  String get systemDefault => 'Default';
 
   @override
   String get light => 'Terang';
@@ -134,7 +85,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get themeColor => 'Warna Tema';
 
   @override
-  String get selectThemeColor => 'Pilih Warna Tema';
+  String get selectThemeColor => 'Pilih warna tema';
 
   @override
   String get preferences => 'Preferensi';
@@ -152,17 +103,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get clearCache => 'Bersihkan Cache';
 
   @override
-  String get cacheSubtitle => 'Kosongkan ruang penyimpanan';
+  String get cacheSubtitle => 'Bebaskan ruang penyimpanan';
 
   @override
-  String get cacheSuccess => 'Cache berhasil dibersihkan! 🚀';
+  String get cacheSuccess => 'Cache berhasil dibersihkan.';
 
   @override
   String get preparingImage => 'Menyiapkan gambar...';
 
   @override
   String shareMessage(String name, String price) {
-    return 'Lagi pantau harga $name di TideView! Harganya sekarang \$$price. Gimana menurut lu?';
+    return 'Memantau harga $name di TideView.\nHarga saat ini $price.';
   }
 
   @override
@@ -177,16 +128,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get removedFromWatchlist => 'Dihapus dari Watchlist';
 
   @override
-  String get chartResting => 'Grafik Sedang Istirahat';
-
-  @override
-  String get unknownError => 'Error tidak diketahui';
-
-  @override
-  String get tryAgain => 'Coba Lagi';
+  String get chartResting => 'Grafik tidak aktif';
 
   @override
   String get noChartData => 'Tidak ada data grafik';
+
+  @override
+  String get tryAgain => 'Coba lagi';
 
   @override
   String get marketStats => 'Statistik Pasar';
@@ -198,58 +146,47 @@ class AppLocalizationsId extends AppLocalizations {
   String get lastUpdated => 'Terakhir Diperbarui';
 
   @override
-  String get shareCard => 'Bagikan Kartu';
+  String get shareCard => 'Bagikan kartu';
 
   @override
-  String get selectAsset => 'Pilih Aset';
-
-  @override
-  String get searchAssetHint => 'Cari aset (BTC, Apple, USD)...';
+  String get selectAsset => 'Pilih aset';
 
   @override
   String get assetNotFound => 'Aset tidak ditemukan.';
 
   @override
-  String errorWithMessage(String message) {
-    return 'Error: $message';
-  }
+  String get offlineModeMessage => 'Mode offline — menampilkan data tersimpan';
 
   @override
-  String get offlineModeMessage => 'Mode Offline - Menampilkan data cache';
-
-  @override
-  String get setPriceAlert => 'Pasang Alarm Harga';
+  String get setPriceAlert => 'Pasang alert harga';
 
   @override
   String get priceAlertDescription =>
-      'Dapatkan notifikasi push saat harga mencapai target.';
+      'Terima notifikasi saat harga mencapai target.';
 
   @override
-  String get selectAssetLabel => 'PILIH ASET';
+  String get selectAssetLabel => 'Pilih aset';
 
   @override
-  String get chooseAssetHint => 'Pilih Aset...';
+  String get chooseAssetHint => 'Pilih aset...';
 
   @override
-  String get conditionLabel => 'KONDISI';
+  String get conditionLabel => 'Kondisi';
 
   @override
-  String get priceGoesAbove => 'Harga NAIK DI ATAS';
+  String get priceGoesAbove => 'Naik ke';
 
   @override
-  String get priceGoesBelow => 'Harga TURUN DI BAWAH';
+  String get priceGoesBelow => 'Turun ke';
 
   @override
-  String get targetPriceUsd => 'HARGA TARGET (USD)';
+  String get alertSavedSuccess => 'Alert berhasil disimpan';
 
   @override
-  String get alertSavedSuccess => 'Alarm berhasil disimpan!';
+  String get setAlarmButton => 'Pasang alert';
 
   @override
-  String get setAlarmButton => 'Pasang Alarm';
-
-  @override
-  String get widgetSyncRate => 'Frekuensi Sinkronisasi';
+  String get widgetSyncRate => 'Frekuensi sinkronisasi widget';
 
   @override
   String get sync15Min => '15 Menit';
@@ -264,16 +201,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get widgetManagement => 'Manajemen Widget';
 
   @override
-  String get selectedAsset => 'Aset Terpilih';
+  String get selectedAsset => 'Aset terpilih';
 
   @override
   String get notifications => 'Notifikasi';
 
   @override
-  String get manageAlerts => 'Kelola Peringatan Harga';
+  String get manageAlerts => 'Kelola alert';
 
   @override
-  String get noAlerts => 'Belum ada peringatan';
+  String get noAlertsSet => 'Belum ada alert';
 
   @override
   String get priceAbove => 'Di atas';
@@ -282,8 +219,65 @@ class AppLocalizationsId extends AppLocalizations {
   String get priceBelow => 'Di bawah';
 
   @override
-  String get alertDeleted => 'Peringatan dihapus';
+  String get addAlert => 'Tambah alert';
 
   @override
-  String get exploreMarkets => 'Jelajahi Pasar';
+  String get clearCacheConfirmTitle => 'Hapus cache?';
+
+  @override
+  String get clearCacheConfirmMessage =>
+      'Hapus semua data cache?\nTindakan ini tidak dapat dibatalkan.';
+
+  @override
+  String get yesClear => 'Ya, hapus';
+
+  @override
+  String get cancel => 'Batal';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get createNewCategory => 'Buat Kategori Baru';
+
+  @override
+  String get categoryExample => 'misal, Saham Tech, Kripto...';
+
+  @override
+  String get save => 'Simpan';
+
+  @override
+  String get editCategory => 'Edit Kategori';
+
+  @override
+  String get emptyWatchlistMessage => 'Watchlist kosong. Tambahkan aset dulu.';
+
+  @override
+  String get editAssets => 'Edit Aset';
+
+  @override
+  String get reorderList => 'Urutkan Daftar';
+
+  @override
+  String get deleteCategory => 'Hapus Kategori';
+
+  @override
+  String get categoryCreatedTitle => 'Sukses';
+
+  @override
+  String get categoryCreatedMessage => 'Kategori berhasil dibuat.';
+
+  @override
+  String get deleteCategoryConfirmTitle => 'Hapus Kategori?';
+
+  @override
+  String get deleteCategoryConfirmMessage =>
+      'Yakin ingin menghapus kategori ini? Aset di dalamnya akan tetap aman.';
+
+  @override
+  String get yesDelete => 'Ya, hapus';
+
+  @override
+  String get forexIntradayNotAvailable =>
+      'Data harian (Intraday) tidak tersedia untuk Forex.';
 }

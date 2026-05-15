@@ -11,7 +11,7 @@ class CustomBottomNav extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // <--- Panggil L10n
+    final l10n = AppLocalizations.of(context)!; 
     final List<Map<String, dynamic>> items = [
       {'icon': Icons.grid_view_rounded, 'label': l10n.dashboard},
       {'icon': Icons.analytics_rounded, 'label': l10n.markets},

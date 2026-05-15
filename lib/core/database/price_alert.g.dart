@@ -56,6 +56,19 @@ const PriceAlertSchema = CollectionSchema(
           caseSensitive: true,
         )
       ],
+    ),
+    r'isActive': IndexSchema(
+      id: 8092228061260947457,
+      name: r'isActive',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'isActive',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
     )
   },
   links: {},
@@ -147,6 +160,14 @@ extension PriceAlertQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'symbol'),
+      );
+    });
+  }
+
+  QueryBuilder<PriceAlert, PriceAlert, QAfterWhere> anyIsActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'isActive'),
       );
     });
   }
@@ -350,6 +371,51 @@ extension PriceAlertQueryWhere
             .addWhereClause(IndexWhereClause.lessThan(
               indexName: r'symbol',
               upper: [''],
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<PriceAlert, PriceAlert, QAfterWhereClause> isActiveEqualTo(
+      bool isActive) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isActive',
+        value: [isActive],
+      ));
+    });
+  }
+
+  QueryBuilder<PriceAlert, PriceAlert, QAfterWhereClause> isActiveNotEqualTo(
+      bool isActive) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isActive',
+              lower: [],
+              upper: [isActive],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isActive',
+              lower: [isActive],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isActive',
+              lower: [isActive],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isActive',
+              lower: [],
+              upper: [isActive],
+              includeUpper: false,
             ));
       }
     });

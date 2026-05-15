@@ -66,6 +66,51 @@ Display your most-watched asset with live price and 24h change percentage direct
 
 ---
 
+## Architecture Highlights (v1.0.1)
+
+### 🧩 Hybrid API Strategy
+
+TideView 1.0.1 introduces a hybrid data ingestion model that separates quote pricing from historical charting. Current prices are sourced from market-specific APIs:
+
+- **Crypto:** Binance 24hr ticker endpoint
+- **Forex:** Frankfurter latest rates endpoint
+- **Stocks:** Finnhub real-time quote endpoint
+
+Historical chart series are fetched from finance-focused chart providers (Yahoo Finance for `stocks_repository.dart`, Yahoo Finance / FX endpoints for `forex_repository.dart`) to preserve data fidelity and reduce pressure on quote APIs.
+
+This split enables faster quote refreshes while preserving historical chart availability, reducing API dependency and improving resilience when one provider is rate limited or returns stale candle data.
+
+### ⚡ Performance & Caching
+
+TideView pairs a local Isar cache with a 3-minute TTL policy to balance freshness and rate-limit safety.
+
+- **Isar** stores aggregated market snapshots, alert state, chart caches, and user preferences.
+- **3-minute TTL** is enforced in `market_sync_usecase.dart` using `lastCryptoSyncTime`.
+- If cached data exists and is still fresh, the app bypasses network fetches and returns local data immediately.
+
+This strategy prevents redundant polling, limits Finnhub/FastAPI usage, and keeps UI response times low while maintaining market relevance.
+
+### 🔄 Smart Synchronization
+
+TideView now supports a 3-way refresh model for market data:
+
+1. **Manual Pull-to-Refresh** — users can force an on-demand sync from the Markets screen.
+2. **Auto-Refresh Timer** — a periodic timer in `markets_screen.dart` triggers data refresh every 3 minutes.
+3. **Lifecycle Resumption** — when the app returns from background, the app evaluates whether cached data should refresh.
+
+This combination ensures the app stays up to date without over-fetching, while also respecting user intent and app lifecycle transitions.
+
+### 🌍 Market Coverage Enhancements
+
+The v1.0.1 release expands coverage with:
+
+- **Top 50 global stocks** in `stocks_repository.dart`, up from a smaller core set.
+- **Improved intraday Forex support** with 1D-level charting enabled by Yahoo Finance / Frankfurter hybrid handling.
+
+By blending real-time quotes with chart-specialized providers, TideView offers a broader asset universe with deeper intraday visualization and stronger cache-backed performance.
+
+---
+
 ## Technical Stack
 
 | Layer                | Technology                      | Justification                                                                                                                                                                    |

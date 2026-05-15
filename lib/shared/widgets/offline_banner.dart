@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../core/l10n/app_localizations.dart'; 
+import '../../core/l10n/app_localizations.dart';
 
 class OfflineBanner extends StatelessWidget {
   final bool isOffline;
   const OfflineBanner({super.key, required this.isOffline});
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; 
+    final l10n = AppLocalizations.of(context)!;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOut,
@@ -23,7 +23,7 @@ class OfflineBanner extends StatelessWidget {
               const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 16),
               const SizedBox(width: 8),
               Text(
-                l10n.offlineModeMessage, 
+                l10n.offlineModeMessage,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:tideview/core/database/price_alert.dart';
@@ -15,18 +16,24 @@ class MarketSyncUseCase {
   final ForexRepository forexRepo = ForexRepository();
   final StocksRepository stocksRepo = StocksRepository();
   MarketSyncUseCase({required this.apiRepo, required this.isarService});
-  Future<Map<String, dynamic>> getCryptoData() async {
+
+  Future<Map<String, dynamic>> getCryptoData({
+    bool forceRefresh = false,
+  }) async {
     final isar = await isarService.db;
     try {
       final prefs = await isar.userPrefs.get(1);
       final lastSync = prefs?.lastCryptoSyncTime;
       final now = DateTime.now();
       final cachedData = await isar.assetCaches.where().findAll();
-      if (lastSync != null &&
+
+      if (!forceRefresh &&
+          lastSync != null &&
           now.difference(lastSync).inMinutes < 3 &&
           cachedData.isNotEmpty) {
         return {'isOffline': false, 'data': cachedData};
       }
+
       final results = await Future.wait([
         apiRepo.fetchCryptoMarkets().catchError((e) {
           return <Map<String, dynamic>>[];
@@ -38,8 +45,10 @@ class MarketSyncUseCase {
           return <Map<String, dynamic>>[];
         }),
       ]);
+
       final List<AssetCache> masterCache = [];
       double btcPrice = 0.0;
+
       void processAssets(
         List<Map<String, dynamic>> apiList,
         String marketType,
@@ -62,26 +71,46 @@ class MarketSyncUseCase {
           if (cache.symbol == 'BTC') btcPrice = cache.currentPrice;
         }
       }
+
       processAssets(results[0], 'crypto');
       processAssets(results[1], 'forex');
       processAssets(results[2], 'stocks');
+
       if (masterCache.isEmpty) {
         return {'isOffline': true, 'data': cachedData};
       }
+
       await isar.writeTxn(() async {
-        await isar.assetCaches.putAll(masterCache);
-        if (prefs != null) {
-          prefs.lastCryptoSyncTime = DateTime.now();
-          await isar.userPrefs.put(prefs);
+        final currentPrefs = await isar.userPrefs.get(1);
+        final currentTime = DateTime.now();
+        if (currentPrefs != null && currentPrefs.lastCryptoSyncTime != null) {
+          final diff = currentTime.difference(currentPrefs.lastCryptoSyncTime!);
+          if (diff.inSeconds < 45) {
+            return;
+          }
         }
+
+        await isar.assetCaches.putAll(masterCache);
+        if (currentPrefs != null) {
+          currentPrefs.lastCryptoSyncTime = currentTime;
+          await isar.userPrefs.put(currentPrefs);
+        }
+
         final activeAlerts = await isar.priceAlerts
             .filter()
             .isActiveEqualTo(true)
             .findAll();
+
+        final assetMap = <String, AssetCache>{};
+        for (final asset in masterCache) {
+          assetMap[asset.symbol] = asset;
+        }
+
+        final alertsToUpdate = <PriceAlert>[];
+
         for (var alert in activeAlerts) {
-          final asset = masterCache
-              .where((a) => a.symbol == alert.symbol)
-              .firstOrNull;
+          final asset = assetMap[alert.symbol];
+
           if (asset != null) {
             bool isTriggered = false;
             if (alert.isAbove && asset.currentPrice >= alert.targetPrice) {
@@ -98,11 +127,16 @@ class MarketSyncUseCase {
                 alert.isAbove,
               );
               alert.isActive = false;
-              await isar.priceAlerts.put(alert);
+              alertsToUpdate.add(alert);
             }
           }
         }
+
+        if (alertsToUpdate.isNotEmpty) {
+          await isar.priceAlerts.putAll(alertsToUpdate);
+        }
       });
+
       if (btcPrice > 0) {
         await HomeWidget.saveWidgetData<String>(
           'btc_price_widget',
@@ -115,8 +149,12 @@ class MarketSyncUseCase {
       }
       return {'isOffline': false, 'data': masterCache};
     } catch (e) {
-      final cachedData = await isar.assetCaches.where().findAll();
-      return {'isOffline': true, 'data': cachedData};
+      try {
+        final fallbackData = await isar.assetCaches.where().findAll();
+        return {'isOffline': true, 'data': fallbackData};
+      } catch (cacheError) {
+        return {'isOffline': true, 'data': const []};
+      }
     }
   }
 }

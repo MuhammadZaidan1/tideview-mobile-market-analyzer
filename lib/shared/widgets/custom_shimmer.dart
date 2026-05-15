@@ -33,7 +33,6 @@ class _CustomShimmerState extends State<CustomShimmer>
   }
   @override
   Widget build(BuildContext context) {
-    // Ambil warna abu-abu dari tema HP
     final baseColor = Theme.of(
       context,
     ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4);

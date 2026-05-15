@@ -7,9 +7,10 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/theme/color_constants.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/database/asset_cache.dart';
-import '../../shared/widgets/asset_selector_screen.dart';
+import '../../shared/screens/asset_selector_screen.dart';
 import 'manage_alerts_screen.dart';
 import '../../core/providers/api_provider.dart';
+import '../../shared/widgets/custom_popup.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -37,6 +38,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     }
     return 0;
   }
+
   String _themeModeToString(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.light:
@@ -47,6 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         return 'System Default';
     }
   }
+
   ThemeMode _stringToThemeMode(String modeStr) {
     switch (modeStr) {
       case 'Light':
@@ -58,6 +61,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         return ThemeMode.system;
     }
   }
+
   void _showColorPickerBottomSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -143,7 +147,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       },
     );
   }
+
   Future<void> _clearCache() async {
+    HapticFeedback.lightImpact();
+    final l10n = AppLocalizations.of(context)!;
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => CustomPopup(
+        title: l10n.clearCacheConfirmTitle,
+        message: l10n.clearCacheConfirmMessage,
+        type: PopupType.caution, 
+        confirmLabel: l10n.yesClear,
+        cancelLabel: l10n.cancel,
+        onConfirm: () => Navigator.pop(context, true),
+      ),
+    );
+
+    if (confirm != true) return;
+
+    if (!mounted) return;
     HapticFeedback.heavyImpact();
     showDialog(
       context: context,
@@ -165,46 +187,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       ref.invalidate(cryptoDataProvider);
       ref.invalidate(watchlistCategoriesProvider);
       await Future.delayed(const Duration(milliseconds: 500));
+
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.cacheSuccess),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
+        Navigator.pop(context); 
+        showDialog(
+          context: context,
+          builder: (context) => CustomPopup(
+            title: "Success",
+            message: l10n.cacheSuccess,
+            type:
+                PopupType.success, 
+            confirmLabel: l10n.ok,
+            onConfirm: () => Navigator.pop(context),
           ),
         );
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context); 
     }
   }
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, bottom: 8, top: 24),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.grey,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-  BoxDecoration _boxDecoration(BuildContext context) {
-    return BoxDecoration(
-      color: Theme.of(
-        context,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(
-        color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-      ),
-    );
-  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -237,21 +239,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
             physics: const BouncingScrollPhysics(),
             children: [
-              _buildSectionHeader(l10n.appearance),
-              Container(
-                decoration: _boxDecoration(context),
+              _SettingsSectionHeader(title: l10n.appearance),
+              _SettingsSectionCard(
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.dark_mode_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.appTheme,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: DropdownButtonHideUnderline(
+                      title: l10n.appTheme,
+                      trailingWidget: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: currentThemeModeStr,
                           alignment: Alignment.centerRight,
@@ -285,23 +283,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         ),
                       ),
                     ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.05),
-                    ),
-                    ListTile(
-                      leading: Icon(
+                    _SettingsSectionDivider(),
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.palette_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.themeColor,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: Row(
+                      title: l10n.themeColor,
+                      trailingWidget: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
@@ -332,19 +321,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ],
                 ),
               ),
-              _buildSectionHeader(l10n.notifications),
-              Container(
-                decoration: _boxDecoration(context),
-                child: ListTile(
-                  leading: Icon(
+              _SettingsSectionHeader(title: l10n.notifications),
+              _SettingsSectionCard(
+                child: _SettingsOptionTile(
+                  leadingIcon: Icon(
                     Icons.notifications_active_rounded,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  title: Text(
-                    l10n.manageAlerts,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  trailing: const Icon(
+                  title: l10n.manageAlerts,
+                  trailingWidget: const Icon(
                     Icons.chevron_right_rounded,
                     color: Colors.grey,
                   ),
@@ -359,21 +344,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   },
                 ),
               ),
-              _buildSectionHeader(l10n.widgetManagement),
-              Container(
-                decoration: _boxDecoration(context),
+              _SettingsSectionHeader(title: l10n.widgetManagement),
+              _SettingsSectionCard(
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.widgets_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.selectedAsset,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: Row(
+                      title: l10n.selectedAsset,
+                      trailingWidget: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
@@ -406,23 +387,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         }
                       },
                     ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.05),
-                    ),
-                    ListTile(
-                      leading: Icon(
+                    _SettingsSectionDivider(),
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.sync_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.widgetSyncRate,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: DropdownButtonHideUnderline(
+                      title: l10n.widgetSyncRate,
+                      trailingWidget: DropdownButtonHideUnderline(
                         child: DropdownButton<int>(
                           value: themeState.syncIntervalMinutes,
                           alignment: Alignment.centerRight,
@@ -467,21 +439,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ],
                 ),
               ),
-              _buildSectionHeader(l10n.preferences),
-              Container(
-                decoration: _boxDecoration(context),
+              _SettingsSectionHeader(title: l10n.preferences),
+              _SettingsSectionCard(
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.language_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.language,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: DropdownButtonHideUnderline(
+                      title: l10n.language,
+                      trailingWidget: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _selectedLanguage,
                           alignment: Alignment.centerRight,
@@ -515,23 +483,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         ),
                       ),
                     ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.05),
-                    ),
-                    ListTile(
-                      leading: Icon(
+                    _SettingsSectionDivider(),
+                    _SettingsOptionTile(
+                      leadingIcon: Icon(
                         Icons.attach_money_rounded,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      title: Text(
-                        l10n.baseCurrency,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      trailing: DropdownButtonHideUnderline(
+                      title: l10n.baseCurrency,
+                      trailingWidget: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _selectedCurrency,
                           alignment: Alignment.centerRight,
@@ -568,11 +527,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   ],
                 ),
               ),
-              _buildSectionHeader(l10n.dataManagement),
-              Container(
-                decoration: _boxDecoration(context),
-                child: ListTile(
-                  leading: Container(
+              _SettingsSectionHeader(title: l10n.dataManagement),
+              _SettingsSectionCard(
+                child: _SettingsOptionTile(
+                  leadingIcon: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.redAccent.withValues(alpha: 0.1),
@@ -584,18 +542,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       size: 20,
                     ),
                   ),
-                  title: Text(
-                    l10n.clearCache,
-                    style: const TextStyle(
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  title: l10n.clearCache,
+                  titleStyle: const TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
                   ),
                   subtitle: Text(
                     l10n.cacheSubtitle,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  trailing: const Icon(
+                  trailingWidget: const Icon(
                     Icons.chevron_right_rounded,
                     color: Colors.grey,
                   ),
@@ -606,6 +562,93 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
         );
       },
+    );
+  }
+}
+
+class _SettingsSectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SettingsSectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, bottom: 8, top: 24),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.grey,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSectionCard extends StatelessWidget {
+  final Widget child;
+
+  const _SettingsSectionCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SettingsOptionTile extends StatelessWidget {
+  final Widget leadingIcon;
+  final String title;
+  final TextStyle? titleStyle;
+  final Widget? subtitle;
+  final Widget? trailingWidget;
+  final VoidCallback? onTap;
+
+  const _SettingsOptionTile({
+    required this.leadingIcon,
+    required this.title,
+    this.titleStyle,
+    this.subtitle,
+    this.trailingWidget,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: leadingIcon,
+      title: Text(
+        title,
+        style: titleStyle ?? const TextStyle(fontWeight: FontWeight.w600),
+      ),
+      subtitle: subtitle,
+      trailing: trailingWidget,
+      onTap: onTap,
+    );
+  }
+}
+
+class _SettingsSectionDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      indent: 56,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
     );
   }
 }

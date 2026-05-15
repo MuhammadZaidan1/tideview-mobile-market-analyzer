@@ -5,31 +5,56 @@ import '../database/chart_cache.dart';
 
 class CryptoRepository {
   final String binanceUrl = 'https://data-api.binance.vision/api/v3';
+
   Future<List<Map<String, dynamic>>> fetchCryptoMarkets() async {
     try {
       final url = Uri.parse('$binanceUrl/ticker/24hr');
       final response = await http.get(url);
+
       if (response.statusCode == 200) {
-        final List<dynamic> rawData = json.decode(response.body);
-        var usdtPairs = rawData
-            .where((coin) => coin['symbol'].toString().endsWith('USDT'))
-            .toList();
+        final List<dynamic>? rawData =
+            json.decode(response.body) as List<dynamic>?;
+
+        if (rawData == null || rawData.isEmpty) {
+          throw ArgumentError('Data dari Binance kosong atau null');
+        }
+
+        var usdtPairs = rawData.whereType<Map<String, dynamic>>().where((coin) {
+          final symbol = coin['symbol']?.toString() ?? '';
+          return symbol.isNotEmpty && symbol.endsWith('USDT');
+        }).toList();
+
+        if (usdtPairs.isEmpty) {
+          throw Exception('Tidak ada pair USDT yang ditemukan');
+        }
+
         usdtPairs.sort((a, b) {
-          final volA = double.parse(a['quoteVolume'].toString());
-          final volB = double.parse(b['quoteVolume'].toString());
-          return volB.compareTo(volA);
+          try {
+            final volA =
+                double.tryParse(a['quoteVolume']?.toString() ?? '0') ?? 0.0;
+            final volB =
+                double.tryParse(b['quoteVolume']?.toString() ?? '0') ?? 0.0;
+            return volB.compareTo(volA);
+          } catch (e) {
+            return 0;
+          }
         });
+
         final top50 = usdtPairs.take(50).toList();
+
         return top50.map((coin) {
-          final rawSymbol = coin['symbol'].toString();
+          final rawSymbol = coin['symbol']?.toString() ?? '';
           final cleanSymbol = rawSymbol.replaceAll('USDT', '');
           return {
             'symbol': cleanSymbol,
             'name': _getFriendlyName(cleanSymbol),
-            'current_price': double.parse(coin['lastPrice'].toString()),
-            'price_change_percentage_24h': double.parse(
-              coin['priceChangePercent'].toString(),
-            ),
+            'current_price':
+                double.tryParse(coin['lastPrice']?.toString() ?? '0') ?? 0.0,
+            'price_change_percentage_24h':
+                double.tryParse(
+                  coin['priceChangePercent']?.toString() ?? '0',
+                ) ??
+                0.0,
           };
         }).toList();
       } else {
@@ -99,48 +124,6 @@ class CryptoRepository {
     return names[symbol] ?? symbol;
   }
 
-  List<List<double>> _generateStablecoinChart(String timeframe) {
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final formattedPrices = <List<double>>[];
-    int limit = 24;
-    int intervalMs = 3600000;
-    switch (timeframe) {
-      case '1D':
-        limit = 96;
-        intervalMs = 15 * 60000;
-        break;
-      case '1W':
-        limit = 84;
-        intervalMs = 2 * 3600000;
-        break;
-      case '1M':
-        limit = 120;
-        intervalMs = 6 * 3600000;
-        break;
-      case '3M':
-        limit = 90;
-        intervalMs = 24 * 3600000;
-        break;
-      case '1Y':
-        limit = 52;
-        intervalMs = 7 * 86400000;
-        break;
-      case 'ALL':
-        limit = 60;
-        intervalMs = 30 * 86400000;
-        break;
-    }
-    final startTime = now - (limit * intervalMs);
-    for (int i = 0; i <= limit; i++) {
-      double dummyPrice = 1.0 + (i % 2 == 0 ? 0.0001 : -0.0001);
-      formattedPrices.add([
-        (startTime + (i * intervalMs)).toDouble(),
-        dummyPrice,
-      ]);
-    }
-    return formattedPrices;
-  }
-
   Future<List<List<double>>> fetchHistoricalData(
     String symbol,
     String timeframe,
@@ -149,8 +132,9 @@ class CryptoRepository {
     final upperSymbol = symbol.toUpperCase();
     final cacheKey = '${upperSymbol}_$timeframe';
     if (['USDT', 'USDC', 'DAI', 'FDUSD'].contains(upperSymbol)) {
-      return _generateStablecoinChart(timeframe);
+      return []; 
     }
+
     if (isar != null) {
       final cachedChart = await isar.chartCaches
           .where()
@@ -158,12 +142,17 @@ class CryptoRepository {
           .findFirst();
       if (cachedChart != null &&
           DateTime.now().difference(cachedChart.lastUpdated).inMinutes < 30) {
-        final List<dynamic> decoded = json.decode(cachedChart.pricesJson);
-        return decoded
-            .map(
-              (e) => (e as List).cast<num>().map((n) => n.toDouble()).toList(),
-            )
-            .toList();
+        try {
+          final List<dynamic> decoded = json.decode(cachedChart.pricesJson);
+          return decoded
+              .map(
+                (e) =>
+                    (e as List).cast<num>().map((n) => n.toDouble()).toList(),
+              )
+              .toList();
+        } catch (e) {
+          // Silently fail
+        }
       }
     }
     final binanceSymbol = '${upperSymbol}USDT';

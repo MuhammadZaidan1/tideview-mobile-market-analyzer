@@ -6,7 +6,7 @@ part 'chart_cache.g.dart';
 class ChartCache {
   Id id = Isar.autoIncrement;
   @Index(unique: true, replace: true)
-  late String cacheKey; // Format: "symbol_days" contoh: "bitcoin_7"
-  late String pricesJson; // Data harga kita ubah jadi string JSON
+  late String cacheKey; 
+  late String pricesJson; 
   late DateTime lastUpdated;
 }

@@ -22,7 +22,7 @@ class AssetCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
-      ), // Sedikit ditipisin vertikalnya
+      ), 
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
@@ -41,7 +41,7 @@ class AssetCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircleAvatar(
-            radius: 22, // Ukuran disesuaikan dikit
+            radius: 22, 
             backgroundColor: Theme.of(
               context,
             ).colorScheme.primary.withValues(alpha: 0.1),

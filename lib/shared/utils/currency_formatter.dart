@@ -41,7 +41,7 @@ class CurrencyFormatter {
     }
   }
   static double toUSD(double localInputPrice, double exchangeRate) {
-    if (exchangeRate <= 0) return localInputPrice; // Mencegah error bagi-nol
+    if (exchangeRate <= 0) return localInputPrice; 
     return localInputPrice / exchangeRate;
   }
 }

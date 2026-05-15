@@ -9,12 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'TideView';
-
-  @override
-  String get welcome => 'Welcome back';
-
-  @override
   String get dashboard => 'Dashboard';
 
   @override
@@ -27,35 +21,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get createNewCategory => 'Create New Category';
+  String get emptyCategoryMessage =>
+      'Category is empty. Add assets from Markets.';
 
   @override
-  String get categoryExample => 'Example: Galau Coins, Long Term';
-
-  @override
-  String get cancel => 'Cancel';
-
-  @override
-  String get save => 'Save';
-
-  @override
-  String get editCategory => 'Edit Category';
-
-  @override
-  String get emptyWatchlistMessage =>
-      'Main watchlist is still empty.\nAdd coins from Market first!';
-
-  @override
-  String get editAssets => 'Edit Assets';
-
-  @override
-  String get reorderList => 'Reorder List';
-
-  @override
-  String get deleteCategory => 'Delete Category';
-
-  @override
-  String get greeting => 'Hello, Zaidan!';
+  String get greeting => 'TideView';
 
   @override
   String get onlineStatus => 'Online';
@@ -76,29 +46,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToLoadData => 'Failed to load data';
 
   @override
-  String get emptyCategoryMessage =>
-      'Watchlist is empty in this category.\nSearch and add favorites from the Markets menu.';
-
-  @override
-  String get sortBy => 'Sort By';
-
-  @override
-  String get sortByName => 'Name (A - Z)';
-
-  @override
-  String get topGainers => 'Top Gainers (🔥)';
-
-  @override
-  String get topLosers => 'Top Losers (🩸)';
-
-  @override
-  String get marketExplorers => 'Market Explorers';
+  String get exploreMarkets => 'Explore Markets';
 
   @override
   String get searchAssets => 'Search assets...';
-
-  @override
-  String get error => 'Error';
 
   @override
   String get from => 'From';
@@ -122,7 +73,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTheme => 'App Theme';
 
   @override
-  String get systemDefault => 'System Default';
+  String get systemDefault => 'Default';
 
   @override
   String get light => 'Light';
@@ -134,7 +85,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeColor => 'Theme Color';
 
   @override
-  String get selectThemeColor => 'Select Theme Color';
+  String get selectThemeColor => 'Choose theme color';
 
   @override
   String get preferences => 'Preferences';
@@ -155,14 +106,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cacheSubtitle => 'Free up storage space';
 
   @override
-  String get cacheSuccess => 'Cache cleared successfully! 🚀';
+  String get cacheSuccess => 'Cache cleared successfully.';
 
   @override
   String get preparingImage => 'Preparing image...';
 
   @override
   String shareMessage(String name, String price) {
-    return 'Currently monitoring $name price on TideView! It\'s currently \$$price. What do you think?';
+    return 'Monitoring $name price on TideView.\nCurrent price is $price.';
   }
 
   @override
@@ -177,16 +128,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removedFromWatchlist => 'Removed from Watchlist';
 
   @override
-  String get chartResting => 'Chart is Resting';
-
-  @override
-  String get unknownError => 'Unknown error';
-
-  @override
-  String get tryAgain => 'Try Again';
+  String get chartResting => 'Chart is idle';
 
   @override
   String get noChartData => 'No chart data available';
+
+  @override
+  String get tryAgain => 'Try again';
 
   @override
   String get marketStats => 'Market Stats';
@@ -204,61 +152,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAsset => 'Select Asset';
 
   @override
-  String get searchAssetHint => 'Search assets (BTC, Apple, USD)...';
-
-  @override
   String get assetNotFound => 'Asset not found.';
 
   @override
-  String errorWithMessage(String message) {
-    return 'Error: $message';
-  }
+  String get offlineModeMessage => 'Offline mode — showing cached data';
 
   @override
-  String get offlineModeMessage => 'Offline Mode - Showing cached data';
-
-  @override
-  String get setPriceAlert => 'Set Price Alert';
+  String get setPriceAlert => 'Set price alert';
 
   @override
   String get priceAlertDescription =>
-      'Receive a push notification when the price hits your target.';
+      'Receive a notification when price reaches target.';
 
   @override
-  String get selectAssetLabel => 'SELECT ASSET';
+  String get selectAssetLabel => 'Select asset';
 
   @override
-  String get chooseAssetHint => 'Choose Asset...';
+  String get chooseAssetHint => 'Choose asset...';
 
   @override
-  String get conditionLabel => 'CONDITION';
+  String get conditionLabel => 'Condition';
 
   @override
-  String get priceGoesAbove => 'Price goes ABOVE';
+  String get priceGoesAbove => 'Goes above';
 
   @override
-  String get priceGoesBelow => 'Price goes BELOW';
+  String get priceGoesBelow => 'Goes below';
 
   @override
-  String get targetPriceUsd => 'TARGET PRICE (USD)';
+  String get alertSavedSuccess => 'Alert saved';
 
   @override
-  String get alertSavedSuccess => 'Alert saved successfully!';
+  String get setAlarmButton => 'Set alert';
 
   @override
-  String get setAlarmButton => 'Set Alarm';
+  String get widgetSyncRate => 'Widget sync rate';
 
   @override
-  String get widgetSyncRate => 'Widget Sync Rate';
+  String get sync15Min => '15 min';
 
   @override
-  String get sync15Min => '15 Minutes';
+  String get sync30Min => '30 min';
 
   @override
-  String get sync30Min => '30 Minutes';
-
-  @override
-  String get sync1Hour => '1 Hour';
+  String get sync1Hour => '1 hour';
 
   @override
   String get widgetManagement => 'Widget Management';
@@ -270,10 +207,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
-  String get manageAlerts => 'Manage Price Alerts';
+  String get manageAlerts => 'Manage alerts';
 
   @override
-  String get noAlerts => 'No alerts set';
+  String get noAlertsSet => 'No alerts set';
 
   @override
   String get priceAbove => 'Above';
@@ -282,8 +219,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceBelow => 'Below';
 
   @override
-  String get alertDeleted => 'Alert deleted';
+  String get addAlert => 'Add alert';
 
   @override
-  String get exploreMarkets => 'Explore Markets';
+  String get clearCacheConfirmTitle => 'Clear cache?';
+
+  @override
+  String get clearCacheConfirmMessage =>
+      'Delete all cached data?\nThis cannot be undone.';
+
+  @override
+  String get yesClear => 'Yes, clear';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get createNewCategory => 'Create New Category';
+
+  @override
+  String get categoryExample => 'e.g., Tech Stocks, Top Crypto...';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get emptyWatchlistMessage => 'Watchlist is empty. Add assets first.';
+
+  @override
+  String get editAssets => 'Edit Assets';
+
+  @override
+  String get reorderList => 'Reorder List';
+
+  @override
+  String get deleteCategory => 'Delete Category';
+
+  @override
+  String get categoryCreatedTitle => 'Success';
+
+  @override
+  String get categoryCreatedMessage => 'Category created successfully.';
+
+  @override
+  String get deleteCategoryConfirmTitle => 'Delete Category?';
+
+  @override
+  String get deleteCategoryConfirmMessage =>
+      'Are you sure you want to delete this category? Assets inside will remain safe.';
+
+  @override
+  String get yesDelete => 'Yes, delete';
+
+  @override
+  String get forexIntradayNotAvailable =>
+      'Intraday (1D) data is not available for Forex markets.';
 }

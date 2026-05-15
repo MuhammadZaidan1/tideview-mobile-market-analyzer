@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/providers/api_provider.dart';
 import '../../core/database/asset_cache.dart';
-import '../../shared/widgets/asset_selector_screen.dart';
+import '../../shared/screens/asset_selector_screen.dart';
 import '../../shared/utils/currency_formatter.dart';
 import '../../core/providers/exchange_rate_provider.dart';
 import '../../core/theme/theme_provider.dart';
@@ -29,11 +29,13 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
     super.initState();
     _amountController.addListener(_calculateConversion);
   }
+
   @override
   void dispose() {
     _amountController.dispose();
     super.dispose();
   }
+
   void _calculateConversion() {
     final fromAsset = _fromAsset;
     final toAsset = _toAsset;
@@ -56,6 +58,7 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
       });
     }
   }
+
   void _swapAssets() {
     HapticFeedback.mediumImpact();
     setState(() {
@@ -65,6 +68,7 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
     });
     _calculateConversion();
   }
+
   Future<void> _selectAsset(bool isFrom) async {
     HapticFeedback.selectionClick();
     final result = await Navigator.push(
@@ -87,155 +91,7 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
       _calculateConversion();
     }
   }
-  Widget _buildConvertCard({required bool isFrom}) {
-    final l10n = AppLocalizations.of(context)!;
-    final asset = isFrom ? _fromAsset : _toAsset;
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isFrom ? l10n.from : l10n.to,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => _selectAsset(isFrom),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      if (asset != null) ...[
-                        CircleAvatar(
-                          radius: 12,
-                          backgroundColor: primaryColor.withValues(alpha: 0.1),
-                          child: Text(
-                            asset.symbol[0],
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          asset.symbol,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ] else ...[
-                        const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.select,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: isFrom
-                    ? TextField(
-                        controller: _amountController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '0.00',
-                          hintStyle: TextStyle(color: Colors.grey),
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      )
-                    : FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          _convertedResult.toStringAsFixed(
-                            _convertedResult < 1 && _convertedResult > 0
-                                ? 6
-                                : 2,
-                          ),
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: _toAsset == null
-                                ? Colors.grey
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-              ),
-            ],
-          ),
-          if (asset != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              asset.name,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+
   Widget _buildAssetSnapshot(AssetCache asset) {
     final isPositive = asset.priceChange24h >= 0;
     final changeColor = isPositive ? Colors.green : Colors.redAccent;
@@ -327,6 +183,7 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -347,7 +204,6 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
       body: SafeArea(
         child: SingleChildScrollView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          // FIX: Jarak bawah 120 biar lolos dari BottomNav
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,37 +213,26 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
                 children: [
                   Column(
                     children: [
-                      _buildConvertCard(isFrom: true),
+                      _ConvertAssetCard(
+                        isFrom: true,
+                        asset: _fromAsset,
+                        amountController: _amountController,
+                        convertedResult: _convertedResult,
+                        onSelect: () => _selectAsset(true),
+                      ),
                       const SizedBox(height: 8),
-                      _buildConvertCard(isFrom: false),
+                      _ConvertAssetCard(
+                        isFrom: false,
+                        asset: _toAsset,
+                        amountController: null,
+                        convertedResult: _convertedResult,
+                        onSelect: () => _selectAsset(false),
+                      ),
                     ],
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.swap_vert_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: _swapAssets,
-                      ),
-                    ),
+                  _ConvertSwapButton(
+                    primaryColor: primaryColor,
+                    onPressed: _swapAssets,
                   ),
                 ],
               ),
@@ -445,6 +290,208 @@ class _ConvertScreenState extends ConsumerState<ConvertScreen>
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConvertAssetCard extends StatelessWidget {
+  final bool isFrom;
+  final AssetCache? asset;
+  final TextEditingController? amountController;
+  final double convertedResult;
+  final VoidCallback onSelect;
+
+  const _ConvertAssetCard({
+    required this.isFrom,
+    required this.asset,
+    required this.amountController,
+    required this.convertedResult,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isFrom ? l10n.from : l10n.to,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: onSelect,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      if (asset != null) ...[
+                        CircleAvatar(
+                          radius: 12,
+                          backgroundColor: primaryColor.withValues(alpha: 0.1),
+                          child: Text(
+                            asset!.symbol[0],
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          asset!.symbol,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ] else ...[
+                        const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.select,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: isFrom
+                    ? TextField(
+                        controller: amountController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: '0.00',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      )
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          convertedResult.toStringAsFixed(
+                            convertedResult < 1 && convertedResult > 0 ? 6 : 2,
+                          ),
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: asset == null
+                                ? Colors.grey
+                                : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+          if (asset != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              asset!.name,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ConvertSwapButton extends StatelessWidget {
+  final Color primaryColor;
+  final VoidCallback onPressed;
+
+  const _ConvertSwapButton({
+    required this.primaryColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        shape: BoxShape.circle,
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: primaryColor,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: IconButton(
+          icon: const Icon(Icons.swap_vert_rounded, color: Colors.white),
+          onPressed: onPressed,
         ),
       ),
     );

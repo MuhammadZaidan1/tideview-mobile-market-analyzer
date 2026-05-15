@@ -20,21 +20,25 @@ void callbackDispatcher() {
       final isar =
           Isar.getInstance() ??
           await Isar.open(appSchemas, directory: dir.path);
+
       final cachedData = await isar.assetCaches.where().findAll();
       final prefs = await isar.userPrefs.get(1);
       final targetSymbol = prefs?.widgetAssetSymbol ?? 'BTC';
+
       final results = await Future.wait([
-        CryptoRepository().fetchCryptoMarkets().catchError(
-          (_) => <Map<String, dynamic>>[],
-        ),
-        ForexRepository().fetchForexMarkets().catchError(
-          (_) => <Map<String, dynamic>>[],
-        ),
-        StocksRepository().fetchStockMarkets().catchError(
-          (_) => <Map<String, dynamic>>[],
-        ),
+        CryptoRepository().fetchCryptoMarkets().catchError((e) {
+          return <Map<String, dynamic>>[];
+        }),
+        ForexRepository().fetchForexMarkets().catchError((e) {
+          return <Map<String, dynamic>>[];
+        }),
+        StocksRepository().fetchStockMarkets().catchError((e) {
+          return <Map<String, dynamic>>[];
+        }),
       ]);
+
       final List<AssetCache> masterCache = [];
+
       void processAssets(
         List<Map<String, dynamic>> apiList,
         String marketType,
@@ -57,74 +61,108 @@ void callbackDispatcher() {
           );
         }
       }
+
       processAssets(results[0], 'crypto');
       processAssets(results[1], 'forex');
       processAssets(results[2], 'stocks');
-      await isar.writeTxn(() async {
-        await isar.assetCaches.putAllByIndex('symbol', masterCache);
-        final activeAlerts = await isar.priceAlerts
-            .filter()
-            .isActiveEqualTo(true)
-            .findAll();
-        for (var alert in activeAlerts) {
-          final asset = masterCache
-              .where((a) => a.symbol == alert.symbol)
-              .firstOrNull;
-          if (asset != null) {
-            bool isTriggered = false;
-            if (alert.isAbove && asset.currentPrice >= alert.targetPrice) {
-              isTriggered = true;
-            } else if (!alert.isAbove &&
-                asset.currentPrice <= alert.targetPrice) {
-              isTriggered = true;
-            }
-            if (isTriggered) {
-              await NotificationHelper.showPriceAlertNotification(
-                alert.symbol,
-                alert.targetPrice,
-                asset.currentPrice,
-                alert.isAbove,
-              );
-              alert.isActive = false;
-              await isar.priceAlerts.put(alert);
+
+      try {
+        await isar.writeTxn(() async {
+          final currentPrefs = await isar.userPrefs.get(1);
+          final now = DateTime.now();
+          if (currentPrefs != null && currentPrefs.lastCryptoSyncTime != null) {
+            final diff = now.difference(currentPrefs.lastCryptoSyncTime!);
+            if (diff.inSeconds < 45) {
+              return;
             }
           }
-        }
-      });
+
+          await isar.assetCaches.putAllByIndex('symbol', masterCache);
+
+          if (currentPrefs != null) {
+            currentPrefs.lastCryptoSyncTime = now;
+            await isar.userPrefs.put(currentPrefs);
+          }
+
+          final activeAlerts = await isar.priceAlerts
+              .filter()
+              .isActiveEqualTo(true)
+              .findAll();
+
+          final assetMap = <String, AssetCache>{};
+          for (final asset in masterCache) {
+            assetMap[asset.symbol] = asset;
+          }
+
+          final alertsToUpdate = <PriceAlert>[];
+
+          for (var alert in activeAlerts) {
+            final asset = assetMap[alert.symbol];
+
+            if (asset != null) {
+              bool isTriggered = false;
+              if (alert.isAbove && asset.currentPrice >= alert.targetPrice) {
+                isTriggered = true;
+              } else if (!alert.isAbove &&
+                  asset.currentPrice <= alert.targetPrice) {
+                isTriggered = true;
+              }
+              if (isTriggered) {
+                await NotificationHelper.showPriceAlertNotification(
+                  alert.symbol,
+                  alert.targetPrice,
+                  asset.currentPrice,
+                  alert.isAbove,
+                );
+                alert.isActive = false;
+                alertsToUpdate.add(alert);
+              }
+            }
+          }
+
+          if (alertsToUpdate.isNotEmpty) {
+            await isar.priceAlerts.putAll(alertsToUpdate);
+          }
+        });
+      } on IsarError {
+        return Future.value(false);
+      }
+
       final targetAsset = await isar.assetCaches
           .filter()
           .symbolEqualTo(targetSymbol, caseSensitive: false)
           .findFirst();
+
       if (targetAsset != null) {
-        final targetCurrency = prefs?.baseCurrency ?? 'USD';
-        final exchangeRate = prefs?.exchangeRate ?? 1.0;
-        final formattedPrice = CurrencyFormatter.format(
-          targetAsset.currentPrice,
-          targetCurrency,
-          exchangeRate,
-        );
-        final formattedChange =
-            '${targetAsset.priceChange24h >= 0 ? '+' : ''}${targetAsset.priceChange24h.toStringAsFixed(2)}%';
-        await HomeWidget.saveWidgetData<String>(
-          'widget_name',
-          targetAsset.name,
-        );
-        await HomeWidget.saveWidgetData<String>(
-          'widget_symbol',
-          targetAsset.symbol,
-        );
-        await HomeWidget.saveWidgetData<String>('widget_price', formattedPrice);
-        await HomeWidget.saveWidgetData<String>(
-          'widget_change',
-          formattedChange,
-        );
-        await HomeWidget.updateWidget(
-          name: 'TideWidgetProvider',
-          androidName: 'TideWidgetProvider',
-        );
+        try {
+          final targetCurrency = prefs?.baseCurrency ?? 'USD';
+          final exchangeRate = prefs?.exchangeRate ?? 1.0;
+          final formattedPrice = CurrencyFormatter.format(
+            targetAsset.currentPrice,
+            targetCurrency,
+            exchangeRate,
+          );
+          final formattedChange =
+              '${targetAsset.priceChange24h >= 0 ? '+' : ''}${targetAsset.priceChange24h.toStringAsFixed(2)}%';
+
+          await Future.wait([
+            HomeWidget.saveWidgetData<String>('widget_name', targetAsset.name),
+            HomeWidget.saveWidgetData<String>(
+              'widget_symbol',
+              targetAsset.symbol,
+            ),
+            HomeWidget.saveWidgetData<String>('widget_price', formattedPrice),
+            HomeWidget.saveWidgetData<String>('widget_change', formattedChange),
+          ]);
+
+          await HomeWidget.updateWidget(
+            name: 'TideWidgetProvider',
+            androidName: 'TideWidgetProvider',
+          );
+        } catch (_) {}
       }
       return Future.value(true);
-    } catch (err) {
+    } catch (_) {
       return Future.value(false);
     }
   });

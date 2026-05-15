@@ -9,12 +9,13 @@ import '../../../core/database/watchlist_category.dart';
 import '../../../core/services/isar_service.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../shared/widgets/asset_card.dart';
-import '../../../shared/widgets/custom_shimmer.dart';
 import '../../../shared/widgets/offline_banner.dart';
 import '../../../shared/widgets/price_alert_bottom_sheet.dart';
 import '../../../shared/utils/currency_formatter.dart';
 import '../../../core/providers/exchange_rate_provider.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/widgets/async_asset_list.dart';
+import '../../../shared/widgets/custom_popup.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -30,6 +31,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   List<AssetCache> _allWatchlistedAssets = [];
   bool _isOffline = false;
   String _activeCategory = 'allCategory';
+
   Future<void> _saveSortOrderToIsar(List<AssetCache> assets) async {
     try {
       if (Isar.instanceNames.isNotEmpty) {
@@ -42,9 +44,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           await isarInstance.assetCaches.putAll(assets);
         });
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
+
   void _showAddCategoryDialog() {
     final TextEditingController controller = TextEditingController();
     showDialog(
@@ -83,9 +85,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               final name = controller.text.trim();
               if (name.isNotEmpty) {
                 final navigatorContext = context;
+                final l10n = AppLocalizations.of(context)!;
+
                 await IsarService().createCustomCategory(name);
                 final _ = ref.refresh(watchlistCategoriesProvider);
-                if (mounted) Navigator.pop(navigatorContext);
+
+                if (mounted) {
+                  Navigator.pop(navigatorContext); 
+                  showDialog(
+                    context: navigatorContext,
+                    builder: (context) => CustomPopup(
+                      title: l10n.categoryCreatedTitle,
+                      message: l10n.categoryCreatedMessage,
+                      type: PopupType.success,
+                      confirmLabel: l10n.ok,
+                      onConfirm: () => Navigator.pop(context),
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -98,6 +115,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       ),
     );
   }
+
   void _showEditCategoryAssetsSheet(String categoryName) {
     final List<AssetCache> localEditList = List.from(_allWatchlistedAssets);
     showModalBottomSheet(
@@ -235,7 +253,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
   void _showReorderCategoriesSheet(List<WatchlistCategory> currentCategories) {
     List<WatchlistCategory> reorderList = List.from(currentCategories);
-
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -301,6 +318,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       ref.invalidate(watchlistCategoriesProvider);
     });
   }
+
   void _showCategoryOptions(
     String categoryName,
     List<WatchlistCategory> allCats,
@@ -340,13 +358,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 style: const TextStyle(color: Colors.red),
               ),
               onTap: () async {
-                await HapticFeedback.heavyImpact();
-                await IsarService().deleteCustomCategory(categoryName);
-                if (mounted) {
-                  setState(() => _activeCategory = 'allCategory');
-                  ref.invalidate(watchlistCategoriesProvider);
-                  ref.invalidate(cryptoDataProvider);
-                  Navigator.pop(context);
+                HapticFeedback.lightImpact();
+                final l10n = AppLocalizations.of(context)!;
+                final bool? confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => CustomPopup(
+                    title: l10n.deleteCategoryConfirmTitle,
+                    message: l10n.deleteCategoryConfirmMessage,
+                    type: PopupType.caution,
+                    confirmLabel: l10n.yesDelete,
+                    cancelLabel: l10n.cancel,
+                    onConfirm: () => Navigator.pop(context, true),
+                  ),
+                );
+
+                if (confirm == true) {
+                  await HapticFeedback.heavyImpact();
+                  await IsarService().deleteCustomCategory(categoryName);
+                  if (mounted) {
+                    setState(() => _activeCategory = 'allCategory');
+                    ref.invalidate(watchlistCategoriesProvider);
+                    ref.invalidate(cryptoDataProvider);
+                    Navigator.pop(context); 
+                  }
                 }
               },
             ),
@@ -355,56 +389,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       ),
     );
   }
-  Widget _buildBubble(
-    String categoryKey, {
-    bool isCustom = false,
-    List<WatchlistCategory>? allCats,
-  }) {
-    final isActive = _activeCategory == categoryKey;
-    final themeColor = Theme.of(context).colorScheme.primary;
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        setState(() => _activeCategory = categoryKey);
-      },
-      onLongPress: isCustom
-          ? () {
-              HapticFeedback.heavyImpact();
-              _showCategoryOptions(categoryKey, allCats ?? []);
-            }
-          : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          _getCategoryDisplayName(categoryKey),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isActive ? themeColor : Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-  String _getCategoryDisplayName(String categoryKey) {
-    switch (categoryKey) {
-      case 'allCategory':
-        return AppLocalizations.of(context)!.allCategory;
-      case 'cryptoCategory':
-        return AppLocalizations.of(context)!.cryptoCategory;
-      case 'stocksCategory':
-        return AppLocalizations.of(context)!.stocksCategory;
-      case 'forexCategory':
-        return AppLocalizations.of(context)!.forexCategory;
-      default:
-        return categoryKey;
-    }
-  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -414,6 +399,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     final rate = ref.watch(exchangeRateProvider).valueOrNull ?? 1.0;
     final baseCurrency =
         ref.watch(themeProvider).valueOrNull?.baseCurrency ?? 'USD';
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
@@ -434,72 +420,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.greeting,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                _DashboardHeader(
+                  onNotificationPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(24),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.greenAccent,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              AppLocalizations.of(context)!.onlineStatus,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
                       ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.notifications_none_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.surface,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(24),
-                              ),
-                            ),
-                            builder: (context) =>
-                                const PriceAlertBottomSheet(initialAsset: null),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                      builder: (context) =>
+                          const PriceAlertBottomSheet(initialAsset: null),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 SingleChildScrollView(
@@ -507,10 +442,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _buildBubble('allCategory'),
-                      _buildBubble('cryptoCategory'),
-                      _buildBubble('stocksCategory'),
-                      _buildBubble('forexCategory'),
+                      _buildBubble(
+                        'allCategory',
+                        AppLocalizations.of(context)!.allCategory,
+                      ),
+                      _buildBubble(
+                        'cryptoCategory',
+                        AppLocalizations.of(context)!.cryptoCategory,
+                      ),
+                      _buildBubble(
+                        'stocksCategory',
+                        AppLocalizations.of(context)!.stocksCategory,
+                      ),
+                      _buildBubble(
+                        'forexCategory',
+                        AppLocalizations.of(context)!.forexCategory,
+                      ),
                       categoriesAsync.maybeWhen(
                         data: (cats) {
                           final sortedCats = List<WatchlistCategory>.from(
@@ -520,6 +467,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                             children: sortedCats
                                 .map(
                                   (c) => _buildBubble(
+                                    c.name,
                                     c.name,
                                     isCustom: true,
                                     allCats: sortedCats,
@@ -559,34 +507,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
           OfflineBanner(isOffline: _isOffline),
           Expanded(
-            child: cryptoDataAsync.when(
-              loading: () => ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                itemCount: 5,
-                itemBuilder: (context, index) => const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: CustomShimmer(height: 100, borderRadius: 24),
-                ),
-              ),
-              error: (err, stack) => Center(
-                child: Text(
-                  '${AppLocalizations.of(context)!.failedToLoadData}: $err',
-                ),
-              ),
-              data: (response) {
+            child: AsyncAssetList<Map<String, dynamic>>(
+              asyncValue: cryptoDataAsync,
+              emptyMessage: AppLocalizations.of(context)!.emptyCategoryMessage,
+              builder: (response) {
                 final responseOfflineStatus = response['isOffline'] == true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted && _isOffline != responseOfflineStatus) {
                     setState(() => _isOffline = responseOfflineStatus);
                   }
                 });
-                final rawData = response['data'];
-                final List<AssetCache> incomingData = rawData is List
-                    ? rawData.whereType<AssetCache>().toList()
-                    : <AssetCache>[];
+
+                final List<AssetCache> incomingData = response['data'] is List
+                    ? (response['data'] as List)
+                          .whereType<AssetCache>()
+                          .toList()
+                    : [];
                 _allWatchlistedAssets = incomingData
                     .where((e) => e.isWatchlisted)
                     .toList();
+
                 var filteredAssets = List<AssetCache>.from(
                   _allWatchlistedAssets,
                 );
@@ -612,24 +552,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                         .toList();
                   }
                 }
+
                 filteredAssets.sort(
                   (a, b) => a.sortOrder.compareTo(b.sortOrder),
                 );
+
                 if (filteredAssets.isEmpty) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Text(
-                        AppLocalizations.of(context)!.emptyCategoryMessage,
-                        style: const TextStyle(color: Colors.grey, height: 1.5),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 48,
+                            color: Colors.grey.shade300,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            AppLocalizations.of(context)!.emptyCategoryMessage,
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   );
                 }
+
                 _localAssets = filteredAssets;
                 return ReorderableListView.builder(
-                  // FIX: Jarak bawah 120 biar lolos dari BottomNav
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
                   itemCount: _localAssets.length,
                   proxyDecorator:
@@ -653,33 +609,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   },
                   itemBuilder: (context, index) {
                     final asset = _localAssets[index];
-                    return Padding(
+                    return _DashboardAssetItem(
                       key: ValueKey(asset.symbol),
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: GestureDetector(
-                        onTap: () async {
-                          await HapticFeedback.heavyImpact();
-                          if (context.mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AssetDetailScreen(asset: asset),
-                              ),
-                            );
-                          }
-                        },
-                        child: AssetCard(
-                          name: asset.name,
-                          symbol: asset.symbol,
-                          formattedPrice: CurrencyFormatter.format(
-                            asset.currentPrice,
-                            baseCurrency,
-                            rate,
+                      asset: asset,
+                      baseCurrency: baseCurrency,
+                      rate: rate,
+                      onTap: () async {
+                        HapticFeedback.heavyImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AssetDetailScreen(asset: asset),
                           ),
-                          change24h: asset.priceChange24h,
-                        ),
-                      ),
+                        );
+                      },
                     );
                   },
                 );
@@ -687,6 +631,139 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBubble(
+    String key,
+    String label, {
+    bool isCustom = false,
+    List<WatchlistCategory>? allCats,
+  }) {
+    final isActive = _activeCategory == key;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() => _activeCategory = key);
+      },
+      onLongPress: isCustom
+          ? () {
+              HapticFeedback.heavyImpact();
+              _showCategoryOptions(key, allCats!);
+            }
+          : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardHeader extends StatelessWidget {
+  final VoidCallback onNotificationPressed;
+
+  const _DashboardHeader({required this.onNotificationPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.greeting,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.greenAccent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  AppLocalizations.of(context)!.onlineStatus,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.notifications_none_rounded,
+              color: Colors.white,
+            ),
+            onPressed: onNotificationPressed,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DashboardAssetItem extends StatelessWidget {
+  final AssetCache asset;
+  final String baseCurrency;
+  final double rate;
+  final VoidCallback onTap;
+
+  const _DashboardAssetItem({
+    super.key,
+    required this.asset,
+    required this.baseCurrency,
+    required this.rate,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GestureDetector(
+        onTap: onTap,
+        child: AssetCard(
+          name: asset.name,
+          symbol: asset.symbol,
+          formattedPrice: CurrencyFormatter.format(
+            asset.currentPrice,
+            baseCurrency,
+            rate,
+          ),
+          change24h: asset.priceChange24h,
+        ),
       ),
     );
   }

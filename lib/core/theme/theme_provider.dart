@@ -10,7 +10,7 @@ import '../database/user_prefs.dart';
 import '../database/schemas.dart';
 import '../database/asset_cache.dart';
 import '../../shared/utils/currency_formatter.dart';
-import '../providers/exchange_rate_provider.dart'; 
+import '../providers/exchange_rate_provider.dart';
 
 class ThemeState {
   final Color accentColor;
@@ -47,10 +47,15 @@ class ThemeState {
 }
 
 class ThemeNotifier extends AsyncNotifier<ThemeState> {
-  late final IsarService _isarService;
+  IsarService? _isarServiceInstance;
+
+  IsarService get _isarService {
+    _isarServiceInstance ??= IsarService();
+    return _isarServiceInstance!;
+  }
+
   @override
   Future<ThemeState> build() async {
-    _isarService = IsarService();
     final prefs = await _isarService.getUserPrefs();
     if (prefs != null) {
       final accentColor = _hexToColor(prefs.activeThemeHex);
@@ -76,15 +81,18 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
       );
     }
   }
+
   Color _hexToColor(String hex) {
     final buffer = StringBuffer();
     if (hex.length == 6 || hex.length == 7) buffer.write('ff');
     buffer.write(hex.replaceFirst('#', ''));
     return Color(int.parse(buffer.toString(), radix: 16));
   }
+
   String _colorToHex(Color color) {
     return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
   }
+
   Future<void> _saveStateToIsar(ThemeState currentState) async {
     final prefs = UserPrefs()
       ..id = 1
@@ -96,6 +104,7 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
       ..widgetAssetSymbol = currentState.widgetAssetSymbol;
     await _isarService.saveUserPrefs(prefs);
   }
+
   Future<void> setAccentColor(Color color) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
@@ -103,6 +112,7 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
     state = AsyncValue.data(newState);
     await _saveStateToIsar(newState);
   }
+
   Future<void> setThemeMode(ThemeMode mode) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
@@ -110,6 +120,7 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
     state = AsyncValue.data(newState);
     await _saveStateToIsar(newState);
   }
+
   Future<void> setLanguageCode(String languageCode) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
@@ -117,6 +128,7 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
     state = AsyncValue.data(newState);
     await _saveStateToIsar(newState);
   }
+
   Future<void> setBaseCurrency(String baseCurrency) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
@@ -128,6 +140,7 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
         .fetchAndUpdateRate(baseCurrency);
     await setWidgetAssetSymbol(currentState.widgetAssetSymbol);
   }
+
   Future<void> setWidgetAssetSymbol(String symbol) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
@@ -178,8 +191,10 @@ class ThemeNotifier extends AsyncNotifier<ThemeState> {
         );
       }
     } catch (e) {
+      // Silently fail
     }
   }
+
   Future<void> setSyncInterval(int minutes) async {
     final currentState = state.valueOrNull;
     if (currentState == null) return;
