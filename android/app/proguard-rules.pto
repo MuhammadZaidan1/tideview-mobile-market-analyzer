@@ -1,0 +1,33 @@
+# Rules ini nyegah R8/ProGuard nge-strip/obfuscate kelas yang dibutuhin
+# plugin-plugin native (biasanya pakai reflection/JNI di baliknya), yang bisa
+# bikin app crash runtime kalau ke-strip padahal keliatannya "gak dipake"
+# secara static analysis.
+
+# Flutter engine & plugin registrant
+-keep class io.flutter.app.** { *; }
+-keep class io.flutter.plugin.**  { *; }
+-keep class io.flutter.util.**  { *; }
+-keep class io.flutter.view.**  { *; }
+-keep class io.flutter.**  { *; }
+-keep class io.flutter.plugins.**  { *; }
+
+# WorkManager (background_service.dart / callbackDispatcher)
+-keep class androidx.work.** { *; }
+-keep class dev.fluttercommunity.workmanager.** { *; }
+
+# flutter_local_notifications
+-keep class com.dexterous.** { *; }
+
+# home_widget + widget provider custom kita
+-keep class es.antonborri.home_widget.** { *; }
+-keep class com.tideview.tideview.TideWidgetProvider { *; }
+-keep class com.tideview.tideview.MainActivity { *; }
+
+# app_links / url_launcher (dipakai buat OAuth deep link Fase 3)
+-keep class io.flutter.plugins.urllauncher.** { *; }
+
+# Umum -- attribute yang sering dibutuhin library serialization/reflection
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-dontwarn sun.misc.**

@@ -1,0 +1,179 @@
+# ==========================================
+# General Files
+# ==========================================
+*.class
+*.log
+*.pyc
+*.swp
+*.swo
+*~
+.DS_Store
+.history
+.svn/
+
+# ==========================================
+# IDE & Editor
+# ==========================================
+# IntelliJ/Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+*.apk
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Other IDEs
+.atom/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# ==========================================
+# Flutter/Dart
+# ==========================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+*.lock
+doc/api/
+**/doc/api/
+
+# Generated files
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Flutter.podspec
+
+# ==========================================
+# Android
+# ==========================================
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/app/.gradle/
+/android/app/local.properties
+/android/.gradle/
+/android/gradle/
+android/local.properties
+android/captures/
+android/**/*.apk
+android/**/*.aab
+**/android/key.properties
+android/app/build/
+android/build/
+**/build/
+*.jks
+*.keystore
+
+# ==========================================
+# iOS
+# ==========================================
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+/ios/Pods/
+/ios/Podfile.lock
+ios/**/*.pbxuser
+ios/**/*.mode1v3
+ios/**/*.mode2v3
+ios/**/*.perspectivev3
+ios/**/*.xcworkspace/xcuserdata/
+ios/**/*.xcworkspace/Pods/
+**/ios/Pods/
+**/ios/Podfile.lock
+
+# ==========================================
+# macOS
+# ==========================================
+/macos/Flutter/Flutter-Debug.xcconfig
+/macos/Flutter/Flutter-Release.xcconfig
+/macos/Flutter/Flutter-Profile.xcconfig
+/macos/Flutter/ephemeral/
+/macos/Pods/
+/macos/Podfile.lock
+/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# ==========================================
+# Linux
+# ==========================================
+linux/flutter/ephemeral/
+linux/build/
+
+# ==========================================
+# Windows
+# ==========================================
+windows/flutter/ephemeral/
+windows/build/
+
+# ==========================================
+# Web
+# ==========================================
+web/generated_plugin_registrant.dart
+
+# ==========================================
+# Build Artifacts & Obfuscation
+# ==========================================
+*.symbols
+app.*.map.json
+/symbols/
+
+# ==========================================
+# OS-Specific Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+.fuse_hidden*
+
+# ==========================================
+# Environment Variables & Secrets (TideView)
+# ==========================================
+.env
+.env*
+!.env.example
+lib/core/env/env.g.dart
+
+# ==========================================
+# Misc Build Files
+# ==========================================
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.ipa
+*.app.dSYM
+dSYM/
+
+# Gradle
+.gradle/
+build/gradle-build.log
+
+# CMake
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
+
+# Test coverage
+coverage/
+.coverage/
+htmlcov/
